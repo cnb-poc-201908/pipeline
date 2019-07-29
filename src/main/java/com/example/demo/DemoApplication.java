@@ -25,7 +25,7 @@ class HelloController {
     @RequestMapping("/")
     public String index() {
     	String hostnameString = "";
-    	SimpleDateFormat sdf = new SimpleDateFormat("MM/dd HH:mm:ss S");
+    	SimpleDateFormat sdf = new SimpleDateFormat("MM/dd HH:mm:ss.S");
     	String now = sdf.format(new Date());
 		try {
 			hostnameString = InetAddress.getLocalHost().getHostName();
