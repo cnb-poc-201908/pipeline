@@ -34,9 +34,10 @@ String INVALID_IMAGE_NAME=DEPLOY_IMAGE_NAME + ':build' + INVALID_IMAGE_NUMBER
     }
     stage('Build Image and Publish') {
         sh 'chmod +x gradlew'
-		def customImage = docker.build(BUILT_IMAGE_NAME)  
+		
 	//	sh 'kubectl version'
-    //  sh "./gradlew clean build"
+        sh "./gradlew clean build"
+	//	def customImage = docker.build(BUILT_IMAGE_NAME)  
 	//	sh "docker build -t ${BUILT_IMAGE_NAME}:${BUILT_IMAGE_TAG} ."
 	//	sh "docker images"
     }
