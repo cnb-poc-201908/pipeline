@@ -6,6 +6,12 @@ def GIT_CRED = 'gitcom-user-bchen'
 
 def SONAR_URL = 'http://ralbz001031.cloud.dst.ibm.com:19000/'
 String DOCKER_REPO="registry.cn-beijing.aliyuncs.com/bmwpoc"
+def DOCKER_REPO_USER = ''
+def DOCKER_REPO_PWD = ''
+
+
+String DOCKER_REG="https://" + DOCKER_REPO + "/"
+String DOCKER_REG_KEY = "9643e3f4-6725-4294-a8ca-94a156195e8f"
 
 def PRODUCT_NAME="demo"
 def BUILT_IMAGE_SUFFIX="-dev"
@@ -30,13 +36,24 @@ String INVALID_IMAGE_NAME=DEPLOY_IMAGE_NAME + ':build' + INVALID_IMAGE_NUMBER
         echo 'DEPLOY_IMAGE_NAME: ' + DEPLOY_IMAGE_NAME
         echo "DEPLOY_IMAGE_TAG: " + DEPLOY_IMAGE_TAG
         echo 'INVALID_IMAGE_NAME: ' + INVALID_IMAGE_NAME
+		
+	    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: DOCKER_REG_KEY,
+        usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+            DOCKER_REPO_USER = USERNAME
+            DOCKER_REPO_PWD = PASSWORD
+		}
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: GIT_CRED, url: GIT_URL]]])
     }
     stage('Build Image and Publish') {
-        sh 'chmod +x gradlew'
-		
-	//	sh 'kubectl version'
+        sh 'chmod +x gradlew'		
+		echo DOCKER_REPO_USER
         sh "./gradlew clean build"
+            docker.withRegistry(DOCKER_REG,DOCKER_REG_KEY){
+              def customImage = docker.build(DOCKER_REPO + "/" + BUILT_IMAGE_NAME)    
+              customImage.push(BUILT_IMAGE_TAG)
+              customImage.push("latest")
+            }
+        
 	//	def customImage = docker.build(BUILT_IMAGE_NAME)  
 	//	sh "docker build -t ${BUILT_IMAGE_NAME}:${BUILT_IMAGE_TAG} ."
 	//	sh "docker images"
