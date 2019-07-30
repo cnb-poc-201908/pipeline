@@ -53,19 +53,12 @@ String INVALID_IMAGE_NAME=DEPLOY_IMAGE_NAME + ':build' + INVALID_IMAGE_NUMBER
               customImage.push(BUILT_IMAGE_TAG)
               customImage.push("latest")
             }
-        
-	//	def customImage = docker.build(BUILT_IMAGE_NAME)  
-	//	sh "docker build -t ${BUILT_IMAGE_NAME}:${BUILT_IMAGE_TAG} ."
-	//	sh "docker images"
     }
 
     //################# CD PART ###################################
-
-    stage("Tag Image for Test"){
-        echo "Tag image and push"
-    }      
-
-    stage("Deploy to Env ${DEPLOY_ENV_SUFFIX}"){
+       stage("Deploy to Env ${DEPLOY_ENV_SUFFIX}"){
        echo "Deploy"
+	   sh "sed 's/$version$/" + BUILT_IMAGE_TAG + "/g' myfile.txt"
+	   sh "cat ./ci/demo.yaml"
     }           
 }
