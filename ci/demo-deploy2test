@@ -58,7 +58,7 @@ String INVALID_IMAGE_NAME=DEPLOY_IMAGE_NAME + ':build' + INVALID_IMAGE_NUMBER
     //################# CD PART ###################################
        stage("Deploy to Env ${DEPLOY_ENV_SUFFIX}"){
        echo "Deploy"
-	   sh "sed 's/$version$/" + BUILT_IMAGE_TAG + "/g' myfile.txt"
-	   sh "cat ./ci/demo.yaml"
+	   sh "sed -i 's/{version}/" + BUILT_IMAGE_TAG + "/g' ./ci/demo.yaml"
+	   sh "kubectl apply -f ./ci/demo.yaml"
     }           
 }

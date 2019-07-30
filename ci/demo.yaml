@@ -12,9 +12,6 @@ spec:
       containers:
         - name: demo-dev
           image: registry.cn-beijing.aliyuncs.com/bmwpoc/demo-dev:{version}
-          env:
-            - name: JAVA_OPTS
-              value: -Djenkins.install.runSetupWizard=false
           ports:
             - name: http-port
               containerPort: 8080
