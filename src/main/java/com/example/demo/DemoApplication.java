@@ -33,7 +33,10 @@ class HelloController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("---------------------------");
     	System.out.println(hostnameString + " @ " + now);
+    	System.out.println("---------------------------");
+
         return "Greetings from " + hostnameString + " @ " + now;
     }
 

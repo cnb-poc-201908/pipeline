@@ -44,20 +44,29 @@ String INVALID_IMAGE_NAME=DEPLOY_IMAGE_NAME + ':build' + INVALID_IMAGE_NUMBER
 		}
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: GIT_CRED, url: GIT_URL]]])
     }
-    stage('Build Image and Publish') {
-        sh 'chmod +x gradlew'		
-		echo DOCKER_REPO_USER
-        sh "./gradlew clean build"
-            docker.withRegistry(DOCKER_REG,DOCKER_REG_KEY){
+	
+	stage('SonarQube analysis') {
+		sh 'chmod +x gradlew'
+        withSonarQubeEnv(credentialsId: 'sonar-token') {
+          sh "./gradlew clean build sonarqube"
+        }
+		 timeout(time: 10, unit: 'MINUTES') {
+			def qg = waitForQualityGate()
+			echo qg
+              if (qg.status != 'OK') {
+                  error "Pipeline aborted due to quality gate failure: ${qg.status}"
+              }
+		 }
+		
+    }
+
+    //################# CD PART ###################################
+       stage("Build image and Deploy to Env ${DEPLOY_ENV_SUFFIX}"){
+       docker.withRegistry(DOCKER_REG,DOCKER_REG_KEY){
               def customImage = docker.build(DOCKER_REPO + "/" + BUILT_IMAGE_NAME)    
               customImage.push(BUILT_IMAGE_TAG)
               customImage.push("latest")
             }
-    }
-
-    //################# CD PART ###################################
-       stage("Deploy to Env ${DEPLOY_ENV_SUFFIX}"){
-       echo "Deploy"
 	   sh "sed -i 's/{version}/" + BUILT_IMAGE_TAG + "/g' ./ci/demo.yaml"
 	   sh "kubectl apply -f ./ci/demo.yaml"
     }           
